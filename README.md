@@ -1,2 +1,3 @@
 # stock-market-predictor
-A system to predict stock market using Recurrent Neural Network(RNN)
+
+This is meant to be a project done for my university and it's very likely to not recieve any maintanance. Fork it and customize it to your needs.
