@@ -1,4 +1,5 @@
 .vscode
 __pycache__/
 *.csv
-test.ipynb"main.ipynb" 
+test.ipynb
+main.ipynb
