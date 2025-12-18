@@ -1,21 +1,20 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-def plotResidualsVsPredicted(testLoader, dataset, _predictions, _actuals):
+def plotResidualsVsPredicted(_dataset, _predictions, _actuals):
     """
     Residuals vs Predicted Values: Check for bias
     """
     
     # Denormalize
-    predictionsOriginal = dataset.inverseTransform(_predictions)
-    actualsOriginal = dataset.inverseTransform(_actuals)
+    predictionsOriginal = _dataset.inverseTransform(_predictions)
+    actualsOriginal = _dataset.inverseTransform(_actuals)
     
     residuals = predictionsOriginal - actualsOriginal
     
-    # Create plot
     plt.figure(figsize=(10, 8))
     scatter = plt.scatter(predictionsOriginal, residuals, 
-                         c=range(len(residuals)),  # Color by time order
+                         c=range(len(residuals)), 
                          cmap='plasma', 
                          alpha=0.7, 
                          s=50,
@@ -24,7 +23,6 @@ def plotResidualsVsPredicted(testLoader, dataset, _predictions, _actuals):
     
     plt.axhline(y=0, color='red', linestyle='-', linewidth=2, alpha=0.5, label='Zero Error Line')
     
-    # Add zero residual line and ±1 standard deviation bands
     stdResiduals = np.std(residuals)
     plt.axhline(y=stdResiduals, color='orange', linestyle='--', alpha=0.5, label=f'+1 Std Dev (${stdResiduals:.2f})')
     plt.axhline(y=-stdResiduals, color='orange', linestyle='--', alpha=0.5, label=f'-1 Std Dev (${stdResiduals:.2f})')
@@ -38,7 +36,6 @@ def plotResidualsVsPredicted(testLoader, dataset, _predictions, _actuals):
     plt.legend()
     plt.grid(True, alpha=0.3)
     
-    # Calculate bias
     meanResidual = np.mean(residuals)
     biasPercent = (meanResidual / np.mean(actualsOriginal)) * 100
     

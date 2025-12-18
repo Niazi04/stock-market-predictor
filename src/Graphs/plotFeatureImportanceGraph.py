@@ -7,14 +7,13 @@ def plotFeatureImportance(_model, _dataset, _device):
     """
     _model.eval()
     
-    # Create test sequences with one feature at a time
     testSequences = []
     featureNames = ['Open', 'Close', 'Volume']
     
     # Get a sample sequence
     _, sampleX, _ = _dataset[0]
     
-    for i in range(3):  # For each feature
+    for i in range(3):
         modifiedX = sampleX.clone()
         # Zero out this feature
         modifiedX[:, i] = mean(modifiedX[:, i])
@@ -30,7 +29,6 @@ def plotFeatureImportance(_model, _dataset, _device):
             impact = abs(pred - baseline) / abs(baseline) * 100
             featureImpacts.append(impact)
     
-    # Plot
     plt.figure(figsize=(10, 6))
     bars = plt.bar(featureNames, featureImpacts, 
                    color=['skyblue', 'lightgreen', 'salmon'],
@@ -41,7 +39,6 @@ def plotFeatureImportance(_model, _dataset, _device):
     plt.title('Feature Importance Analysis', fontsize=14, fontweight='bold')
     plt.grid(True, alpha=0.3, axis='y')
     
-    # Add value labels
     for bar, impact in zip(bars, featureImpacts):
         height = bar.get_height()
         plt.text(bar.get_x() + bar.get_width()/2., height + 0.5,

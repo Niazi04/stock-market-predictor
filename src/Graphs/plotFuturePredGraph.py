@@ -16,16 +16,14 @@ def plotFuturePredictions(_model, _dataset, _device, daysAhead=5):
     actualsIfAvailable = []
     dates = ["Today"]
     
-    # Today's actual price
     todayPrice = float(_dataset.inverseTransform(np.array([lastY.item()]))[0])
     predictions.append(todayPrice)
     
-    # Predict future days (autoregressive)
-    currentSequence = lastX.clone()  # Start with last known sequence
+    # Predict future days (autoregressive) - Start with last known sequence
+    currentSequence = lastX.clone() 
     
     for day in range(1, daysAhead + 1):
         with no_grad():
-            # Add batch dimension and predict
             predNormalized = _model(currentSequence.unsqueeze(0).to(_device)).cpu().item()
             
             # Denormalize
@@ -34,25 +32,20 @@ def plotFuturePredictions(_model, _dataset, _device, daysAhead=5):
             dates.append(f"Day +{day}")
             
             # Update sequence for next prediction (autoregressive)
-            # Remove oldest, add prediction as new "Close" price
             newSequence = currentSequence[1:].clone()
             
-            # Create new data point (use same Open as previous Close, or average)
-            # This is simplified - in reality you'd need more sophisticated logic
             lastPoint = newSequence[-1].clone()
             newPoint = tensor([
-                lastPoint[1],  # Open = previous Close
+                lastPoint[1],    # Open = previous Close
                 predNormalized,  # Close = prediction
-                lastPoint[2]   # Volume = keep same (or predict)
+                lastPoint[2]     # Volume = keep same (or predict)
             ])
             
             newSequence = cat([newSequence, newPoint.unsqueeze(0)])
             currentSequence = newSequence
     
-    # Plot
     plt.figure(figsize=(12, 7))
     
-    # Historical context (last 10 days)
     historicalPrices = []
     historicalDates = []
     for i in range(max(0, lastIdx-9), lastIdx+1):
@@ -61,19 +54,17 @@ def plotFuturePredictions(_model, _dataset, _device, daysAhead=5):
         historicalPrices.append(price)
         historicalDates.append(f"D-{lastIdx-i}")
     
-    # Plot historical
     plt.plot(historicalDates, historicalPrices, 'bo-', 
              label='Historical', linewidth=2, markersize=6)
     
-    # Plot predictions
     predictionIndices = range(len(historicalDates)-1, len(historicalDates)+len(predictions)-1)
-    allDates = historicalDates + dates[1:]  # Skip "Today" since it's in historical
+    allDates = historicalDates + dates[1:]
     allPrices = historicalPrices + predictions[1:]
     
     plt.plot(predictionIndices, predictions, 'ro--', 
              label='Predictions', linewidth=3, markersize=10, marker='X')
     
-    # Fill uncertainty (simple version - could use prediction intervals)
+    # TODO:: use prediction intervals)
     plt.fill_between(predictionIndices, 
                      [p * 0.98 for p in predictions],  # -2%
                      [p * 1.02 for p in predictions],  # +2%
@@ -85,7 +76,6 @@ def plotFuturePredictions(_model, _dataset, _device, daysAhead=5):
     plt.legend()
     plt.grid(True, alpha=0.3)
     
-    # Add value labels
     for i, (date, price) in enumerate(zip(allDates[-len(predictions):], predictions)):
         plt.annotate(f'${price:.2f}', 
                     xy=(predictionIndices[i], price), 
@@ -95,7 +85,6 @@ def plotFuturePredictions(_model, _dataset, _device, daysAhead=5):
                     fontsize=10,
                     bbox=dict(boxstyle='round,pad=0.3', facecolor='yellow', alpha=0.7))
     
-    # Add summary
     totalChange = ((predictions[-1] / predictions[0]) - 1) * 100
     avgDailyChange = totalChange / daysAhead
     

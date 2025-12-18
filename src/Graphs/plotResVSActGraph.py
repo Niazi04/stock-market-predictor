@@ -1,20 +1,18 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-def plotResidualsVsActual(testLoader, dataset, _predictions, _actuals):
+def plotResidualsVsActual(_dataset, _predictions, _actuals):
     """
     Residuals vs Actual Values: Check for heteroscedasticity
     """
-    # Denormalize
-    predictionsOriginal = dataset.inverseTransform(_predictions)
-    actualsOriginal = dataset.inverseTransform(_actuals)
+    predictionsOriginal = _dataset.inverseTransform(_predictions)
+    actualsOriginal = _dataset.inverseTransform(_actuals)
     
     residuals = predictionsOriginal - actualsOriginal
     
-    # Create plot
     plt.figure(figsize=(10, 8))
     scatter = plt.scatter(actualsOriginal, residuals, 
-                         c=np.abs(residuals),  # Color by absolute error
+                         c=np.abs(residuals),
                          cmap='viridis', 
                          alpha=0.7, 
                          s=50,
@@ -41,7 +39,6 @@ def plotResidualsVsActual(testLoader, dataset, _predictions, _actuals):
     plt.legend()
     plt.grid(True, alpha=0.3)
     
-    # Calculate and display correlation
     correlation = np.corrcoef(actualsOriginal, residuals)[0, 1]
     correlationText = "No correlation" if abs(correlation) < 0.1 else \
                       "Weak correlation" if abs(correlation) < 0.3 else \
